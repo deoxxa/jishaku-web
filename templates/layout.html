@@ -1,0 +1,34 @@
+{{ define "layout" }}<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ .Title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/vendor/normalize.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="shortcut icon" href="/favicon.png">
+  </head>
+  <body>
+{{ template "nav" . }}
+{{ template "header" . }}
+{{ template "content" . }}
+{{ template "footer" . }}
+  </body>
+</html>
+{{ end }}
+
+{{ define "nav" }}
+<nav>
+  <span><a href="/">Jishaku</a></span>
+  <ul>
+    <li><a href="https://twitter.com/jishakutoshokan">@jishakutoshokan</a></li>
+    <li><a href="/submit">Submit</a></li>
+    <li><a href="/help">Help</a></li>
+  </ul>
+</nav>
+{{ end }}
+
+{{ define "footer" }}
+<footer>
+  All original content is licensed under the Creative Commons <a href="https://creativecommons.org/licenses/by-nc-sa/2.5/">Attribution-NonCommercial-ShareAlike 2.5 Generic</a> license.
+</footer>
+{{ end }}

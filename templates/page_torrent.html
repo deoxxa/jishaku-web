@@ -1,0 +1,54 @@
+{{ define "header" }}{{ end }}
+
+{{ define "content" }}
+<div class="torrent-details">
+  <h1>{{ .Torrent.Name }}</h1>
+  <h4>Hash: {{ .Torrent.Hash }}</h4>
+
+  <h3>Stats</h3>
+  <ul class="stats">
+    <li>Submitted <time datetime="{{ .Torrent.FirstSeen | iso }}" title="{{ .Torrent.FirstSeen | iso }}">{{ .Torrent.FirstSeen | ago }}</time></li>
+{{ if .Torrent.CreationDate }}
+    <li>Created{{ if .Torrent.CreationDate }} <time datetime="{{ .Torrent.CreationDate | iso }}" title="{{ .Torrent.CreationDate | iso }}">{{ .Torrent.CreationDate | ago }}</time>{{ end }}{{ if .Torrent.CreatedBy }} with {{ .Torrent.CreatedBy.Client }}{{ if .Torrent.CreatedBy.Version }} ({{ .Torrent.CreatedBy.Version }}){{ end }}{{ end }}</li>
+{{ end }}
+    <li>{{ .Torrent.Size | size }} in {{ len .Torrent.Files }} {{ "file" | plural (len .Torrent.Files) }}</li>
+  </ul>
+
+  <h3>Comment</h3>
+  <blockquote class="comment">
+{{ if .Torrent.Comment }}{{ .Torrent.Comment }}{{ else }}no comment{{ end }}
+  </blockquote>
+
+  <h3>Files</h3>
+  <table class="files">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Size</th>
+      </tr>
+    </thead>
+    <tbody>
+{{ range .Torrent.Files }}
+      <tr>
+        <td>{{ .Name }}</td>
+        <td>{{ .Size | size }}</td>
+      </tr>
+{{ end }}
+    </tbody>
+  </table>
+
+  <h3>Links</h3>
+  <ol class="links">
+{{ range .Torrent.Locations }}
+    <li><a href="{{ . }}" rel="nofollow">{{ . | host }}</a></li>
+{{ end }}
+  </ol>
+
+  <h3>Trackers</h3>
+  <ul class="trackers">
+{{ range .Torrent.Trackers }}
+    <li>{{ . }}</li>
+{{ end }}
+  </ul>
+</div>
+{{ end }}

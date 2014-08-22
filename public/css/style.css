@@ -1,0 +1,209 @@
+body {
+  font-size: 16px;
+}
+
+h1, h2, h3, h4, h5 {
+  margin: 10px 0px;
+}
+
+pre {
+  margin: 0px;
+}
+
+time {
+  text-decoration: underline;
+}
+
+nav {
+  background: #303030;
+  color: #f0f0f0;
+  margin-bottom: 10px;
+  height: 43px;
+}
+
+nav > span {
+  float: left;
+  font-size: 150%;
+  margin-left: 10px;
+}
+
+nav > span > a {
+  color: inherit;
+  text-decoration: none;
+  line-height: 43px;
+}
+
+nav > ul {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+  float: right;
+}
+
+nav > ul > li {
+  float: left;
+}
+
+nav > ul > li > a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  line-height: 43px;
+  padding: 0px 15px;
+  height: 43px;
+  border-left: 1px solid #202020;
+}
+
+nav > ul > li > a:hover {
+  background: #404040;
+}
+
+header {
+  margin: 10px;
+  text-align: center;
+}
+
+.search > form > input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #fafafa;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 150%;
+  padding: 0.4em 0.6em;
+}
+
+.search > .stats {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 10px 0px;
+}
+
+.search > .hints {
+  font-size: 0.8em;
+}
+
+.search > .hints > ul {
+  margin: 0px;
+  padding: 0px;
+  list-style: none;
+}
+
+.search > .hints > ul > li {
+  display: inline-block;
+  padding: 0px;
+  margin: 0px;
+}
+
+footer {
+  color: #c0c0c0;
+  margin: 10px;
+  text-align: center;
+}
+
+.help {
+  max-width: 800px;
+  margin: auto;
+}
+
+.help h3:target {
+  background: yellow;
+}
+
+.index {
+  margin: 10px;
+}
+
+.user {
+  margin: 10px;
+}
+
+.torrent-details {
+  margin: 10px;
+}
+
+.torrent-submit > table {
+  margin: auto;
+}
+
+.torrent-submit > table td {
+  padding: 5px;
+}
+
+.torrent-submit > table > tbody > tr:last-child > td {
+  text-align: center;
+}
+
+.torrent-submit label {
+  font-weight: bold;
+}
+
+.torrent-submit input[type=submit] {
+  padding: 0.5em 1em;
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
+}
+
+.torrent-list {
+  display: block;
+  padding: 0px;
+  border: 1px solid #e0e0e0;
+}
+
+.torrent-list tr > td {
+  padding: 5px;
+  white-space: nowrap;
+}
+
+.torrent-list tr > td:first-child {
+  width: 100%;
+  white-space: normal;
+}
+
+.torrent-list tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.torrent-list tr:last-child {
+  border-bottom: none;
+}
+
+.torrent-list .torrent-details {
+  color: #a0a0a0;
+  font-style: italic;
+  font-size: 0.9em;
+  display: block;
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+  margin-top: 0.2em;
+}
+
+.torrent-list .torrent-details > li {
+  display: inline-block;
+}
+
+.torrent-list .torrent-details > li:after {
+  content: ";";
+}
+
+.torrent-list .torrent-details > li:last-child:after {
+  content: "";
+}
+
+.torrent-list ul.torrent-links {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+.pagination {
+  margin: 10px 0px;
+  padding: 0px;
+  list-style: none;
+  text-align: center;
+}
+
+.pagination li {
+  display: inline-block;
+}

@@ -1,0 +1,119 @@
+package main
+
+import (
+	"html/template"
+	"log"
+	"net/http"
+	"net/url"
+	"time"
+
+	"bitbucket.org/pkg/inflect"
+	"code.google.com/p/go-uuid/uuid"
+	"github.com/dustin/go-humanize"
+	"github.com/gorilla/mux"
+	"github.com/olivere/elastic"
+)
+
+var templateFunctions = template.FuncMap{
+	"ago":  humanize.Time,
+	"size": humanize.Bytes,
+	"iso":  func(t time.Time) string { return t.Format(time.RFC3339) },
+	"host": func(s string) string {
+		if u, err := url.Parse(s); err != nil {
+			return ""
+		} else {
+			return u.Host
+		}
+	},
+	"plural": func(n int, s string) string {
+		if n == 1 {
+			return s
+		} else {
+			return inflect.Pluralize(s)
+		}
+	},
+}
+
+type pageData struct {
+	Title string
+}
+
+type appConfig struct {
+	domain  string
+	esHosts []string
+	esIndex string
+}
+
+type app struct {
+	config appConfig
+	es     *elastic.Client
+	router *mux.Router
+}
+
+type appRoute struct {
+	*app
+	fn func(w http.ResponseWriter, r *http.Request)
+}
+
+func (a *appRoute) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.fn(w, r)
+}
+
+func newApp(c appConfig) *app {
+	es, err := elastic.NewClient(&http.Client{}, c.esHosts...)
+	if err != nil {
+		panic(err)
+	}
+
+	a := &app{
+		config: c,
+		es:     es,
+		router: mux.NewRouter(),
+	}
+
+	a.router.NotFoundHandler = http.FileServer(http.Dir("./public"))
+
+	a.router.NewRoute().Name("search_get").Methods("GET").Path("/").Handler(&appRoute{
+		app: a,
+		fn:  a.getSearch,
+	})
+
+	a.router.NewRoute().Name("torrent_get").Methods("GET").Path("/torrent/{id:[0-9a-f]{40}}").Handler(&appRoute{
+		app: a,
+		fn:  a.getTorrent,
+	})
+
+	return a
+}
+
+type wrappedWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func newWrappedWriter(w http.ResponseWriter) *wrappedWriter {
+	return &wrappedWriter{
+		ResponseWriter: w,
+		status:         200,
+	}
+}
+
+func (w *wrappedWriter) WriteHeader(status int) {
+	w.status = status
+
+	w.ResponseWriter.WriteHeader(status)
+}
+
+func (h *app) ServeHTTP(_w http.ResponseWriter, r *http.Request) {
+	w := newWrappedWriter(_w)
+
+	id := uuid.New()
+	t := time.Now()
+
+	log.Printf("request time=%#v id=%s method=%s path=%#v", time.Now().Format(time.RFC3339), id, r.Method, r.URL.String())
+	defer func() {
+		log.Printf("response time=%#v id=%s status=%d duration=%s", time.Now().Format(time.RFC3339), id, w.status, time.Since(t))
+	}()
+
+	h.router.ServeHTTP(w, r)
+}
