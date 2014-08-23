@@ -31,6 +31,7 @@
 
   <h3>Links</h3>
   <ol class="links">
+    <li><a href="{{ .Torrent.MagnetURI }}" rel="nofollow">Magnet Link</a></li>
 {{ range .Torrent.Locations }}
     <li><a href="{{ . }}" rel="nofollow">{{ . | host }}</a></li>
 {{ end }}

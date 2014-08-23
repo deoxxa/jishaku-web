@@ -14,7 +14,7 @@ import (
 
 type getTorrentData struct {
 	pageData
-	Torrent torrent
+	Torrent *torrent
 }
 
 var torrentTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_torrent.html"))
@@ -43,7 +43,7 @@ func (a *app) getTorrent(w http.ResponseWriter, r *http.Request) {
 		pageData: pageData{
 			Title: t.Name,
 		},
-		Torrent: t,
+		Torrent: &t,
 	}
 
 	if err := torrentTemplate.ExecuteTemplate(w, "layout", pageData); err != nil {
