@@ -98,6 +98,6 @@ func (a *app) getSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := searchTemplate.ExecuteTemplate(w, "layout", pageData); err != nil {
-		http.Error(w, "uh oh", 500)
+		http.Error(w, err.Error(), 500)
 	}
 }

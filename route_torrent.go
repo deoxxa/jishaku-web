@@ -43,6 +43,6 @@ func (a *app) getTorrent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := torrentTemplate.ExecuteTemplate(w, "layout", pageData); err != nil {
-		http.Error(w, "uh oh", 500)
+		http.Error(w, err.Error(), 500)
 	}
 }
