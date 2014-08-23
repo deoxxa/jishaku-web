@@ -18,7 +18,7 @@ var torrentTemplate = template.Must(template.New("template").Funcs(templateFunct
 func (a *app) getTorrent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	res, err := a.es.Get().Index(a.config.esIndex).Id(vars["id"]).Do()
+	res, err := a.es.Get().Index(a.config.esIndex).Type("torrent").Id(vars["id"]).Do()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
