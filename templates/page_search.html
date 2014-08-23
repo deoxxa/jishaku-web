@@ -56,7 +56,6 @@
           <ul class="torrent-details">
             <li><span title="{{ .Size }} bytes">{{ .Size | size }}</span></li>
             <li>submitted to Jishaku <time datetime="{{ .FirstSeen | iso }}" title="{{ .FirstSeen | iso }}">{{ .FirstSeen | ago }}</time></li>
-            <li>created <time datetime="{{ .CreationDate | iso }}" title="{{ .CreationDate | iso }}">{{ .CreationDate | ago }}</time></li>
           </ul>
         </td>
         <td>

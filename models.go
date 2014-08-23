@@ -8,20 +8,14 @@ import (
 
 type torrent struct {
 	Hash      string
-	FirstSeen time.Time
 	Name      string
-	Comment   string
-	CreatedBy struct {
-		Client  string
-		Version string
+	Size      uint64
+	FirstSeen time.Time
+	Files     []struct {
+		Length uint64
+		Path   string
 	}
-	CreationDate time.Time
-	Size         uint64
-	Trackers     []string
-	Files        []struct {
-		Name string
-		Size uint64
-	}
+	Trackers  []string
 	Locations []string
 }
 
