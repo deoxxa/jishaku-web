@@ -38,8 +38,7 @@ type pageData struct {
 }
 
 type AppConfig struct {
-	Domain string
-	Store  StoreFactory
+	Store StoreFactory
 }
 
 type app struct {

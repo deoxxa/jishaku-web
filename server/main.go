@@ -12,7 +12,6 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 
 	app, err := web.NewApp(web.AppConfig{
-		Domain: "localhost",
 		Store: web.StoreFactory{
 			Constructor: elasticsearch.NewStore,
 			Config: elasticsearch.Config{
