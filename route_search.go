@@ -2,7 +2,6 @@ package web
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 
 	"github.com/thraxil/paginate"
@@ -78,8 +77,6 @@ func (a *app) getSearch(w http.ResponseWriter, r *http.Request) {
 			torrents = append(torrents, t)
 		}
 	}
-
-	log.Printf("%#v", torrents)
 
 	pageData := searchData{
 		pageData: pageData{
