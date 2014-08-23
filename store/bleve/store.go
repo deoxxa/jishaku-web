@@ -7,7 +7,7 @@ import (
 	"os/user"
 	"path"
 
-	"fknsrs.biz/jishaku/web"
+	"fknsrs.biz/p/jishaku-web"
 	"github.com/couchbaselabs/bleve"
 	"github.com/jmhodges/levigo"
 )

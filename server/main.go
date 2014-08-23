@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"fknsrs.biz/jishaku/web"
-	"fknsrs.biz/jishaku/web/store/bleve"
-	"fknsrs.biz/jishaku/web/store/elasticsearch"
+	"fknsrs.biz/p/jishaku-web"
+	"fknsrs.biz/p/jishaku-web/store/bleve"
+	"fknsrs.biz/p/jishaku-web/store/elasticsearch"
 )
 
 var (

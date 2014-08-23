@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"fknsrs.biz/jishaku/web"
+	"fknsrs.biz/p/jishaku-web"
 	"github.com/olivere/elastic"
 )
 
