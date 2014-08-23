@@ -21,10 +21,9 @@ type torrent struct {
 
 func (t *torrent) MagnetURI() (template.URL, error) {
 	q := url.Values{
-		"xt": {"urn:btih:" + t.Hash},
 		"dn": {t.Name},
 		"tr": t.Trackers,
 	}
 
-	return template.URL("magnet:" + q.Encode()), nil
+	return template.URL("magnet:?xt=urn:btih:" + t.Hash + "&" + q.Encode()), nil
 }
