@@ -83,6 +83,11 @@ func newApp(c appConfig) *app {
 		fn:  a.getTorrent,
 	})
 
+	a.router.NewRoute().Name("submit_get").Methods("GET").Path("/submit").Handler(&appRoute{
+		app: a,
+		fn:  a.getSubmit,
+	})
+
 	a.router.NewRoute().Name("torrent_post").Methods("POST").Path("/torrent").Handler(&appRoute{
 		app: a,
 		fn:  a.postTorrent,

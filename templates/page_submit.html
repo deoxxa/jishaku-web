@@ -1,0 +1,17 @@
+{{ define "header" }}{{ end }}
+
+{{ define "content" }}
+<form class="torrent-submit" action="/torrent" method="post" enctype="multipart/form-data">
+  <table>
+    <tbody>
+      <tr>
+        <td><label for="torrent-submit-url">URL</label></td>
+        <td><input id="torrent-submit-url" type="text" name="url" size="40"></td>
+      </tr>
+      <tr>
+        <td colspan="2"><input type="submit" value="Submit Torrent"></td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+{{ end }}
