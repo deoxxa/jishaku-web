@@ -9,6 +9,7 @@ import (
 
 	"fknsrs.biz/p/jishaku-web"
 	"github.com/couchbaselabs/bleve"
+	"github.com/couchbaselabs/bleve/analysis/token_filters/ngram_filter"
 	"github.com/jmhodges/levigo"
 )
 
@@ -57,7 +58,12 @@ func NewStore(c interface{}) (web.Store, error) {
 			return nil, err
 		}
 
-		index, err = bleve.New(path.Join(location, "index"), bleve.NewIndexMapping())
+		m := bleve.NewIndexMapping()
+		m.DefaultAnalyzer = "simple"
+		a := m.AnalyzerNamed("simple")
+		a.TokenFilters = append(a.TokenFilters, ngram_filter.NewNgramFilter(2, 30))
+
+		index, err = bleve.New(path.Join(location, "index"), m)
 		if err != nil {
 			return nil, err
 		}
