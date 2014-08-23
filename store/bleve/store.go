@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"os/user"
 	"path"
 
 	"fknsrs.biz/jishaku/web"
@@ -28,25 +29,35 @@ func NewStore(c interface{}) (web.Store, error) {
 		return nil, errors.New("invalid config type")
 	}
 
-	if err := os.MkdirAll(config.Location, 0755); err != nil {
+	location := config.Location
+	if location[0:1] == "~" {
+		currentUser, err := user.Current()
+		if err != nil {
+			return nil, err
+		}
+
+		location = path.Join(currentUser.HomeDir, location[1:])
+	}
+
+	if err := os.MkdirAll(location, 0755); err != nil {
 		return nil, err
 	}
 
 	opts := levigo.NewOptions()
 	opts.SetCache(levigo.NewLRUCache(3 << 30))
 	opts.SetCreateIfMissing(true)
-	docs, err := levigo.Open(path.Join(config.Location, "docs"), opts)
+	docs, err := levigo.Open(path.Join(location, "docs"), opts)
 	if err != nil {
 		return nil, err
 	}
 
-	index, err := bleve.Open(path.Join(config.Location, "index"))
+	index, err := bleve.Open(path.Join(location, "index"))
 	if err != nil {
 		if err.Error() != "cannot open index, path does not exist" {
 			return nil, err
 		}
 
-		index, err = bleve.New(path.Join(config.Location, "index"), bleve.NewIndexMapping())
+		index, err = bleve.New(path.Join(location, "index"), bleve.NewIndexMapping())
 		if err != nil {
 			return nil, err
 		}
