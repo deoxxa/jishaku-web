@@ -99,7 +99,7 @@ func (a *app) postTorrent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("location", u.String())
-	w.WriteHeader(201)
+	w.WriteHeader(303)
 }
 
 func (a *app) postTorrentFile(w http.ResponseWriter, r *http.Request) {
@@ -116,5 +116,5 @@ func (a *app) postTorrentFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("location", u.String())
-	w.WriteHeader(201)
+	w.WriteHeader(303)
 }
