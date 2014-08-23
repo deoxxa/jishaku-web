@@ -83,6 +83,16 @@ func newApp(c appConfig) *app {
 		fn:  a.getTorrent,
 	})
 
+	a.router.NewRoute().Name("torrent_post").Methods("POST").Path("/torrent").Handler(&appRoute{
+		app: a,
+		fn:  a.postTorrent,
+	})
+
+	a.router.NewRoute().Name("torrent_post_file").Methods("POST").Path("/torrent").Headers("content-type", "application/x-bittorrent").Handler(&appRoute{
+		app: a,
+		fn:  a.postTorrentFile,
+	})
+
 	return a
 }
 
