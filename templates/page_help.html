@@ -1,0 +1,98 @@
+{{ define "header" }}{{ end }}
+
+{{ define "content" }}
+<div class="help">
+  <h1 id="help">Help</h1>
+  <hr>
+  <h3 id="topics">Topics</h3>
+  <ul>
+    <li>
+      <a href="#frequently-asked-questions">Frequently Asked Questions</a>
+      <ul>
+        <li><a href="#what-is-jishaku-">What is Jishaku?</a></li>
+        <li><a href="#hold-on-hasn-t-jishaku-been-around-for-a-while-">Hold on, hasn&#39;t Jishaku been around for a while?</a></li>
+        <li><a href="#who-are-you-">Who are you?</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#logging-in">Logging In</a>
+      <ul>
+        <li><a href="#why-should-i-log-in-">Why should I log in?</a></li>
+        <li><a href="#why-don-t-i-have-a-jishaku-account-">Why don&#39;t I have a Jishaku account?</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#searching">Searching</a>
+      <ul>
+        <li><a href="#search-accuracy">Search accuracy</a></li>
+        <li><a href="#advanced-search-syntax">Advanced search syntax</a></li>
+      </ul>
+    </li>
+  </ul>
+  <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+  <hr>
+  <h3 id="what-is-jishaku-">What is Jishaku?</h3>
+  <p>Jishaku is, first and foremost, an archive of bittorrent information. It exposes
+  a very flexible search mechanism for querying its database of bittorrent
+  metadata. No actual content is hosted on Jishaku, nor are the .torrent files
+  themselves. Jishaku is designed to serve as a historical archive and aggregation
+  of links to different sources for bittorrent files.</p>
+  <h3 id="hold-on-hasn-t-jishaku-been-around-for-a-while-">Hold on, hasn&#39;t Jishaku been around for a while?</h3>
+  <p>Correct. Jishaku was born out of frustration in late 2009, when the
+  then-dominant bittorrent index <a href="https://www.tokyotosho.info/">Tokyo Toshokan</a>
+  went offline for an extended period. At that point, some friends and I (from the
+  now-defunct nekosubs fansubbing group) hastily put together a replacement, and
+  called it Jishaku Toshokan (as we were focussing on magnet links, and Jishaku
+  means magnet in Japanese.)</p>
+  <p>Over the years, Jishaku stagnated. Burdened with features and technical debt, it
+  began to collapse under its own weight until the day where it simply stopped
+  returning responses.</p>
+  <p>There was a constant background desire for me to restore it to its former glory,
+  until I finally found myself with a couple of spare days to put together a
+  minimally-functional prototype of what I wanted the new Jishaku to be - simple,
+  clean, and fast. By stripping away most of what made the previous Jishaku so
+  difficult to maintain and computationally demanding, an overwhemingly simple
+  core was exposed, and it&#39;s that core that will carry Jishaku into the future.</p>
+  <h3 id="who-are-you-">Who are you?</h3>
+  <p>Hi there! My name is Conrad, but you can call me CJ if you like. A lot of my
+  friends call me that. I live and work in Melbourne, Australia. I like
+  travelling, studying languages (both human and programming,) meeting people and
+  talking. Sometimes I get to do all these things at once!</p>
+  <p>On the internet, I&#39;m most commonly known by the handle deoxxa:</p>
+  <ul>
+    <li><a href="https://twitter.com/deoxxa">twitter</a></li>
+    <li><a href="https://github.com/deoxxa">github</a></li>
+    <li><a href="mailto:deoxxa@fknsrs.biz">email</a></li>
+  </ul>
+  <h1 id="logging-in">Logging In</h1>
+  <hr>
+  <h3 id="why-should-i-log-in-">Why should I log in?</h3>
+  <p>Logging in will record you as the owner of any submissions you make.</p>
+  <p>There are other features planned that will only work properly after logging in:</p>
+  <ul>
+    <li>Editing your submissions&#39; descriptions and other metadata</li>
+    <li>Removing submissions</li>
+    <li>Personalised default searches</li>
+    <li>Optional, per-user index pages</li>
+  </ul>
+  <h3 id="why-don-t-i-have-a-jishaku-account-">Why don&#39;t I have a Jishaku account?</h3>
+  <p>Keeping passwords and user information is really hard to get right. I don&#39;t want
+  the responsibility of keeping your personal information safe, so I&#39;ve decided to
+  let Twitter take care of it for now. They seem to have a handle on it.</p>
+  <h1 id="searching">Searching</h1>
+  <hr>
+  <h3 id="search-accuracy">Search accuracy</h3>
+  <p>The search engine powering Jishaku is designed to provide highly accurate search
+  results. If you have trouble finding a specific result, please <a href="mailto:deoxxa@fknsrs.biz?subject=Jishaku Search Accuracy">let me know</a>.</p>
+  <h3 id="simple-search-syntax">Simple search syntax</h3>
+  <p>By default, searching on Jishaku will just search in the title/comment of the
+  torrents. To search other fields, use the <a href="#advanced-search-syntax">advanced search syntax</a>.</p>
+  <h3 id="advanced-search-syntax">Advanced search syntax</h3>
+  <p>Jishaku supports <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax">ElasticSearch Query Syntax</a>.
+  This advanced syntax allows you to construct very rich searches to hone in on
+  exactly what you want to find.</p>
+  <p>This functionality is triggered by adding <strong>&quot;` &quot;</strong> to the start of your search
+  query (that&#39;s a grave accent, usually located next to the 1 key on your
+  keyboard, followed by a space.)</p>
+</div>
+{{ end }}

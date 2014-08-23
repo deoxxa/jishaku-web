@@ -93,6 +93,11 @@ func newApp(c appConfig) *app {
 		fn:  a.postTorrentFile,
 	})
 
+	a.router.NewRoute().Name("help_get").Methods("GET").Path("/help").Handler(&appRoute{
+		app: a,
+		fn:  a.getHelp,
+	})
+
 	return a
 }
 
