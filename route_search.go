@@ -44,12 +44,15 @@ func (c *searchItems) TotalItems() int {
 func (c *searchItems) ItemRange(offset, count int) []interface{} {
 	var l []interface{}
 
-	if torrents, err := c.app.store.Search(c.query, offset, count); err == nil {
-		l = make([]interface{}, len(torrents))
+	torrents, err := c.app.store.Search(c.query, offset, count)
+	if err != nil {
+		panic(err)
+	}
 
-		for i, torrent := range torrents {
-			l[i] = torrent
-		}
+	l = make([]interface{}, len(torrents))
+
+	for i, torrent := range torrents {
+		l[i] = torrent
 	}
 
 	return l
