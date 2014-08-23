@@ -12,11 +12,13 @@ be usable both as a public system, where many users are being served by one
 instance, and as a private system, where only a small group or a single user is
 using it.
 
-Prerequisites
+Configuration
 -------------
 
-Right now, an instance of [ElasticSearch](http://www.elasticsearch.org/) is
-required to store all the record information. This will change in the future.
+There are two backends that can be used for storage, [ElasticSearch](http://www.elasticsearch.org/)
+and [bleve](www.blevesearch.com). ElasticSearch requires an external server, but
+may be more performant on large datasets. bleve is the default option, and does
+not require an external server.
 
 Binaries
 --------
