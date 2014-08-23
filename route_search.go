@@ -1,11 +1,10 @@
-package main
+package web
 
 import (
-	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 
-	"github.com/olivere/elastic"
 	"github.com/thraxil/paginate"
 )
 
@@ -14,7 +13,7 @@ type searchData struct {
 	CurrentQuery string
 	Pages        *paginate.Paginator
 	Page         paginate.Page
-	Torrents     []torrent
+	Torrents     []*Torrent
 }
 
 type searchItems struct {
@@ -23,26 +22,20 @@ type searchItems struct {
 	total int
 }
 
-func newSearchItems(app *app, query string) *searchItems {
+func newSearchItems(app *app, query string) (*searchItems, error) {
 	c := &searchItems{
 		app:   app,
 		query: query,
 	}
 
-	var q elastic.Query
-	if c.query != "" {
-		q = elastic.NewQueryStringQuery(c.query)
-	} else {
-		q = elastic.NewMatchAllQuery()
+	r, err := app.store.Count(query)
+	if err != nil {
+		return nil, err
 	}
 
-	if r, err := c.app.es.Count(c.app.config.esIndex).Type("torrent").Query(q).Do(); err != nil {
-		c.total = 0
-	} else {
-		c.total = int(r)
-	}
+	c.total = r
 
-	return c
+	return c, nil
 }
 
 func (c *searchItems) TotalItems() int {
@@ -50,22 +43,13 @@ func (c *searchItems) TotalItems() int {
 }
 
 func (c *searchItems) ItemRange(offset, count int) []interface{} {
-	var q elastic.Query
-	if c.query != "" {
-		q = elastic.NewQueryStringQuery(c.query)
-	} else {
-		q = elastic.NewMatchAllQuery()
-	}
-
 	var l []interface{}
 
-	if r, err := c.app.es.Search(c.app.config.esIndex).Type("torrent").Query(q).From(offset).Size(count).Do(); err == nil {
-		l = make([]interface{}, len(r.Hits.Hits))
+	if torrents, err := c.app.store.Search(c.query, offset, count); err == nil {
+		l = make([]interface{}, len(torrents))
 
-		for i, d := range r.Hits.Hits {
-			var t torrent
-			json.Unmarshal(*d.Source, &t)
-			l[i] = t
+		for i, torrent := range torrents {
+			l[i] = torrent
 		}
 	}
 
@@ -75,17 +59,27 @@ func (c *searchItems) ItemRange(offset, count int) []interface{} {
 var searchTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_search.html"))
 
 func (a *app) getSearch(w http.ResponseWriter, r *http.Request) {
-	items := newSearchItems(a, r.URL.Query().Get("q"))
+	items, err := newSearchItems(a, r.URL.Query().Get("q"))
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
 	paginator := paginate.NewPaginator(items, 25)
 	page := paginator.GetPage(r)
 
-	torrents := make([]torrent, 0)
+	torrents := make([]*Torrent, 0)
 
 	for _, e := range page.Items() {
-		if t, ok := e.(torrent); ok {
+		if t, ok := e.(*Torrent); !ok {
+			http.Error(w, "error getting torrents", 500)
+			return
+		} else {
 			torrents = append(torrents, t)
 		}
 	}
+
+	log.Printf("%#v", torrents)
 
 	pageData := searchData{
 		pageData: pageData{

@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"html/template"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type torrent struct {
+type Torrent struct {
 	Hash      string
 	Name      string
 	Size      uint64
@@ -19,7 +19,7 @@ type torrent struct {
 	Locations []string
 }
 
-func (t *torrent) MagnetURI() (template.URL, error) {
+func (t *Torrent) MagnetURI() (template.URL, error) {
 	q := url.Values{
 		"dn": {t.Name},
 		"tr": t.Trackers,

@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"html/template"
@@ -11,7 +11,6 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
-	"github.com/olivere/elastic"
 )
 
 var templateFunctions = template.FuncMap{
@@ -38,15 +37,14 @@ type pageData struct {
 	Title string
 }
 
-type appConfig struct {
-	domain  string
-	esHosts []string
-	esIndex string
+type AppConfig struct {
+	Domain string
+	Store  StoreFactory
 }
 
 type app struct {
-	config appConfig
-	es     *elastic.Client
+	config AppConfig
+	store  Store
 	router *mux.Router
 }
 
@@ -59,15 +57,15 @@ func (a *appRoute) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.fn(w, r)
 }
 
-func newApp(c appConfig) *app {
-	es, err := elastic.NewClient(&http.Client{}, c.esHosts...)
+func NewApp(c AppConfig) (*app, error) {
+	store, err := c.Store.build()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	a := &app{
 		config: c,
-		es:     es,
+		store:  store,
 		router: mux.NewRouter(),
 	}
 
@@ -103,7 +101,7 @@ func newApp(c appConfig) *app {
 		fn:  a.getHelp,
 	})
 
-	return a
+	return a, nil
 }
 
 type wrappedWriter struct {

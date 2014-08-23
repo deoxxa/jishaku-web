@@ -1,7 +1,6 @@
-package main
+package web
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -14,7 +13,7 @@ import (
 
 type getTorrentData struct {
 	pageData
-	Torrent *torrent
+	Torrent *Torrent
 }
 
 var torrentTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_torrent.html"))
@@ -22,28 +21,22 @@ var torrentTemplate = template.Must(template.New("template").Funcs(templateFunct
 func (a *app) getTorrent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	res, err := a.es.Get().Index(a.config.esIndex).Type("torrent").Id(vars["id"]).Do()
+	torrent, err := a.store.Get(vars["id"])
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	if !res.Found {
+	if torrent == nil {
 		http.Error(w, "not found", 404)
-		return
-	}
-
-	var t torrent
-	if err := json.Unmarshal(*res.Source, &t); err != nil {
-		http.Error(w, err.Error(), 500)
 		return
 	}
 
 	pageData := getTorrentData{
 		pageData: pageData{
-			Title: t.Name,
+			Title: torrent.Name,
 		},
-		Torrent: &t,
+		Torrent: torrent,
 	}
 
 	if err := torrentTemplate.ExecuteTemplate(w, "layout", pageData); err != nil {
@@ -51,13 +44,13 @@ func (a *app) getTorrent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *app) consumeTorrentStream(r io.Reader) (*torrent, error) {
+func (a *app) consumeTorrentStream(r io.Reader) (*Torrent, error) {
 	meta, err := libtorrent.ParseMetainfo(r)
 	if err != nil {
 		return nil, err
 	}
 
-	t := torrent{
+	t := Torrent{
 		Hash:      fmt.Sprintf("%x", meta.InfoHash),
 		FirstSeen: time.Now(),
 		Name:      meta.Name,
@@ -69,7 +62,7 @@ func (a *app) consumeTorrentStream(r io.Reader) (*torrent, error) {
 		t.Size += f.Length
 	}
 
-	if _, err := a.es.Index().Index(a.config.esIndex).Type("torrent").Id(t.Hash).BodyJson(t).Do(); err != nil {
+	if err := a.store.Add(&t); err != nil {
 		return nil, err
 	}
 
