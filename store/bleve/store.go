@@ -3,6 +3,7 @@ package bleve
 import (
 	"encoding/json"
 	"errors"
+	"os"
 	"path"
 
 	"fknsrs.biz/jishaku/web"
@@ -25,6 +26,10 @@ func NewStore(c interface{}) (web.Store, error) {
 	config, ok := c.(Config)
 	if !ok {
 		return nil, errors.New("invalid config type")
+	}
+
+	if err := os.MkdirAll(config.Location, 0755); err != nil {
+		return nil, err
 	}
 
 	opts := levigo.NewOptions()
