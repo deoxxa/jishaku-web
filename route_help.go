@@ -3,9 +3,10 @@ package web
 import (
 	"html/template"
 	"net/http"
+	"path"
 )
 
-var helpTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_help.html"))
+var helpTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles(path.Join(root, "templates/layout.html"), path.Join(root, "templates/page_help.html")))
 
 func (a *app) getHelp(w http.ResponseWriter, r *http.Request) {
 	pageData := pageData{

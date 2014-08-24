@@ -5,8 +5,10 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"path"
 	"time"
 
+	"bitbucket.org/kardianos/osext"
 	"bitbucket.org/pkg/inflect"
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/dustin/go-humanize"
@@ -32,6 +34,8 @@ var templateFunctions = template.FuncMap{
 		}
 	},
 }
+
+var root, _ = osext.ExecutableFolder()
 
 type pageData struct {
 	Title string
@@ -68,7 +72,7 @@ func NewApp(c AppConfig) (*app, error) {
 		router: mux.NewRouter(),
 	}
 
-	a.router.NotFoundHandler = http.FileServer(http.Dir("./public"))
+	a.router.NotFoundHandler = http.FileServer(http.Dir(path.Join(root, "public")))
 
 	a.router.NewRoute().Name("search_get").Methods("GET").Path("/").Handler(&appRoute{
 		app: a,

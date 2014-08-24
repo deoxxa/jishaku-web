@@ -3,6 +3,7 @@ package web
 import (
 	"html/template"
 	"net/http"
+	"path"
 
 	"github.com/thraxil/paginate"
 )
@@ -58,7 +59,7 @@ func (c *searchItems) ItemRange(offset, count int) []interface{} {
 	return l
 }
 
-var searchTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_search.html"))
+var searchTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles(path.Join(root, "templates/layout.html"), path.Join(root, "templates/page_search.html")))
 
 func (a *app) getSearch(w http.ResponseWriter, r *http.Request) {
 	items, err := newSearchItems(a, r.URL.Query().Get("q"))

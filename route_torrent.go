@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/deoxxa/libtorrent"
@@ -16,7 +17,7 @@ type getTorrentData struct {
 	Torrent *Torrent
 }
 
-var torrentTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_torrent.html"))
+var torrentTemplate = template.Must(template.New("template").Funcs(templateFunctions).ParseFiles(path.Join(root, "templates/layout.html"), path.Join(root, "templates/page_torrent.html")))
 
 func (a *app) getTorrent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
