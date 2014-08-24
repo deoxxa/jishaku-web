@@ -36,7 +36,7 @@ restart of the server. Changing the server requires a complete rebuild.
 Binaries
 --------
 
-Binaries are available from [bintray](https://bintray.com/deoxxa/jishaku-web/jishaku-web/view).
+Binaries are available from [bintray](https://bintray.com/deoxxa/jishaku-web/jishaku-web/_latestVersion).
 I'll try to keep them updated, but feel free to poke me if they get too stale.
 
 Building
