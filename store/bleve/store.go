@@ -3,14 +3,19 @@ package bleve
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"os"
 	"os/user"
 	"path"
 
 	"fknsrs.biz/p/jishaku-web"
+	"github.com/boltdb/bolt"
 	"github.com/couchbaselabs/bleve"
+	"github.com/couchbaselabs/bleve/analysis"
+	"github.com/couchbaselabs/bleve/analysis/token_filters/lower_case_filter"
 	"github.com/couchbaselabs/bleve/analysis/token_filters/ngram_filter"
-	"github.com/jmhodges/levigo"
+	"github.com/couchbaselabs/bleve/analysis/tokenizers/single_token"
+	"github.com/couchbaselabs/bleve/registry"
 )
 
 type Config struct {
@@ -18,10 +23,9 @@ type Config struct {
 }
 
 type Store struct {
-	docs  *levigo.DB
-	index bleve.Index
-	ro    *levigo.ReadOptions
-	wo    *levigo.WriteOptions
+	location string
+	docs     *bolt.DB
+	index    bleve.Index
 }
 
 func NewStore(c interface{}) (web.Store, error) {
@@ -44,13 +48,45 @@ func NewStore(c interface{}) (web.Store, error) {
 		return nil, err
 	}
 
-	opts := levigo.NewOptions()
-	opts.SetCache(levigo.NewLRUCache(3 << 30))
-	opts.SetCreateIfMissing(true)
-	docs, err := levigo.Open(path.Join(location, "docs"), opts)
+	docs, err := bolt.Open(path.Join(location, "docs"), 0600, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	err = docs.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("docs"))
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	registry.RegisterAnalyzer("custom", func(config map[string]interface{}, cache *registry.Cache) (*analysis.Analyzer, error) {
+		keywordTokenizer, err := cache.TokenizerNamed(single_token.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		toLowerFilter, err := cache.TokenFilterNamed(lower_case_filter.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		ngramFilter, err := cache.TokenFilterNamed(ngram_filter.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		rv := analysis.Analyzer{
+			Tokenizer: keywordTokenizer,
+			TokenFilters: []analysis.TokenFilter{
+				toLowerFilter,
+				ngramFilter,
+			},
+		}
+
+		return &rv, nil
+	})
 
 	index, err := bleve.Open(path.Join(location, "index"))
 	if err != nil {
@@ -59,21 +95,19 @@ func NewStore(c interface{}) (web.Store, error) {
 		}
 
 		m := bleve.NewIndexMapping()
-		m.DefaultAnalyzer = "simple"
-		a := m.AnalyzerNamed("simple")
-		a.TokenFilters = append(a.TokenFilters, ngram_filter.NewNgramFilter(2, 30))
+		m.SetDefaultAnalyzer("custom")
 
 		index, err = bleve.New(path.Join(location, "index"), m)
 		if err != nil {
+			log.Printf("%#v", err)
 			return nil, err
 		}
 	}
 
 	s := &Store{
-		docs:  docs,
-		index: index,
-		ro:    levigo.NewReadOptions(),
-		wo:    levigo.NewWriteOptions(),
+		location: location,
+		docs:     docs,
+		index:    index,
 	}
 
 	return s, nil
@@ -85,7 +119,10 @@ func (s *Store) Add(torrent *web.Torrent) error {
 		return err
 	}
 
-	if err := s.docs.Put(s.wo, []byte(torrent.Hash), data); err != nil {
+	err = s.docs.Update(func(tx *bolt.Tx) error {
+		return tx.Bucket([]byte("docs")).Put([]byte(torrent.Hash), data)
+	})
+	if err != nil {
 		return err
 	}
 
@@ -97,9 +134,19 @@ func (s *Store) Add(torrent *web.Torrent) error {
 }
 
 func (s *Store) Get(id string) (*web.Torrent, error) {
-	data, err := s.docs.Get(s.ro, []byte(id))
+	var data []byte
+
+	err := s.docs.View(func(tx *bolt.Tx) error {
+		data = tx.Bucket([]byte("docs")).Get([]byte(id))
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
+	}
+
+	if data == nil {
+		return nil, nil
 	}
 
 	var t web.Torrent
@@ -144,22 +191,29 @@ func (s *Store) Search(query string, offset int, count int) ([]*web.Torrent, err
 	} else {
 		l = make([]*web.Torrent, len(r.Hits))
 
-		for i, d := range r.Hits {
-			data, err := s.docs.Get(s.ro, []byte(d.ID))
-			if err != nil {
-				return nil, err
+		err := s.docs.View(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte("docs"))
+
+			for i, d := range r.Hits {
+				data := b.Get([]byte(d.ID))
+
+				if data == nil {
+					return errors.New("couldn't get document for search result")
+				}
+
+				var t web.Torrent
+				if err := json.Unmarshal(data, &t); err != nil {
+					return err
+				}
+
+				l[i] = &t
 			}
 
-			if data == nil {
-				return nil, errors.New("couldn't get document for search result")
-			}
+			return nil
+		})
 
-			var t web.Torrent
-			if err := json.Unmarshal(data, &t); err != nil {
-				return nil, err
-			}
-
-			l[i] = &t
+		if err != nil {
+			return nil, err
 		}
 	}
 
