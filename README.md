@@ -6,7 +6,7 @@ Jishaku Toshokan's web component!
 HOW 2 GET STARTD
 ----------------
 
-1. Download the package for your platform from [bintray](https://bintray.com/deoxxa/jishaku-web/jishaku-web/_latestVersion)
+1. Download the package for your platform from [bintray](https://bintray.com/deoxxa/jishaku/web/_latestVersion)
 2. Extract the .zip file
 3. Run the `jishaku` program *from within that directory*
 4. Visit [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
@@ -44,7 +44,7 @@ restart of the server. Changing the server requires a complete rebuild.
 Binaries
 --------
 
-Binaries are available from [bintray](https://bintray.com/deoxxa/jishaku-web/jishaku-web/_latestVersion).
+Binaries are available from [bintray](https://bintray.com/deoxxa/jishaku/web/_latestVersion).
 I'll try to keep them updated, but feel free to poke me if they get too stale.
 
 Building
