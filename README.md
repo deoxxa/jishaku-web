@@ -3,6 +3,14 @@ Jishaku Web
 
 Jishaku Toshokan's web component!
 
+HOW 2 GET STARTD
+----------------
+
+1. Download the package for your platform from [bintray](https://bintray.com/deoxxa/jishaku-web/jishaku-web/_latestVersion)
+2. Extract the .zip file
+3. Run the `jishaku` program
+4. Visit [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
+
 Overview
 --------
 
