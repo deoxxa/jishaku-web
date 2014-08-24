@@ -20,16 +20,33 @@ and [bleve](www.blevesearch.com). ElasticSearch requires an external server, but
 may be more performant on large datasets. bleve is the default option, and does
 not require an external server.
 
+Running
+-------
+
+This is pretty darned simple. Unzip the distribution package, then just run the
+`jishaku` binary (or `jishaku.exe` if you're on Windows). Make sure you run it
+from within that directory, or it won't be able to find the data files.
+
+Hacking
+-------
+
+Changing static files requires no restarting. Changing a template requires a
+restart of the server. Changing the server requires a complete rebuild.
+
 Binaries
 --------
 
-Prebuilt binaries will be available soon, but for now you'll have to build the
-application. This will require some knowledge of the go build process.
+Binaries are available from [bintray](https://bintray.com/deoxxa/jishaku-web/jishaku-web/view).
+I'll try to keep them updated, but feel free to poke me if they get too stale.
 
 Building
 --------
 
-Instructions pending.
+Building is laborious and annoying, but the short version is that you have to
+get bleve to build first, then `go build fknsrs.biz/p/jishaku-web/server`. To
+build the distribution binaries, I've got some patches for bleve that remove a
+lot of dependencies that aren't used for Jishaku. You can find those patches in
+[my dev branch](https://github.com/deoxxa/bleve/tree/dev).
 
 License
 -------
