@@ -1,8 +1,5 @@
 create extension if not exists "pg_trgm";
 
-drop table torrents;
-drop type torrent_file;
-
 create type torrent_file as (
   "path" text,
   "length" bigint
