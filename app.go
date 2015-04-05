@@ -34,7 +34,7 @@ type app struct {
 	r  *mux.Router
 }
 
-func initialiseApp() {
+func initialiseTemplates() {
 	box := rice.MustFindBox("templates")
 
 	template_search = template.New("search").Funcs(templateFunctions)
