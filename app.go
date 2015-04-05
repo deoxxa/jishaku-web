@@ -30,7 +30,7 @@ var (
 )
 
 type app struct {
-	db *pgx.Conn
+	db *pgx.ConnPool
 	r  *mux.Router
 }
 
@@ -54,7 +54,7 @@ func initialiseApp() {
 	template_help = template.Must(template_help.Parse(box.MustString("page_help.html")))
 }
 
-func newApp(db *pgx.Conn) (app, error) {
+func newApp(db *pgx.ConnPool) (app, error) {
 	r := mux.NewRouter()
 
 	a := app{db, r}

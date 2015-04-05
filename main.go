@@ -13,8 +13,8 @@ import (
 
 var (
 	addr           = kingpin.Flag("addr", "Listen on this address.").Short('a').Default(":3000").String()
-	databaseUrl    = kingpin.Flag("database_url", "Connect to this database.").Short('d').Default("postgres://localhost/jishaku").String()
-	databaseSocket = kingpin.Flag("database_socket", "Override the database connection config to use this socket.").Short('s').String()
+	databaseName   = kingpin.Flag("database_name", "Use this database.").Short('d').Default("jishaku").String()
+	databaseSocket = kingpin.Flag("database_socket", "Connect to postgres using this socket.").Short('s').String()
 )
 
 func main() {
@@ -22,16 +22,15 @@ func main() {
 
 	initialiseApp()
 
-	dbConfig, err := pgx.ParseURI(*databaseUrl)
-	if err != nil {
-		panic(err)
+	dbConfig := pgx.ConnPoolConfig{
+		ConnConfig: pgx.ConnConfig{
+			Host:     *databaseSocket,
+			Database: *databaseName,
+		},
+		MaxConnections: 4,
 	}
 
-	if *databaseSocket != "" {
-		dbConfig.Host = *databaseSocket
-	}
-
-	db, err := pgx.Connect(dbConfig)
+	db, err := pgx.NewConnPool(dbConfig)
 	if err != nil {
 		panic(err)
 	}
