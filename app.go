@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/GeertJohan/go.rice"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx"
 	"github.com/zeebo/bencode"
@@ -22,15 +23,35 @@ const (
 )
 
 var (
-	template_search = template.Must(template.New("search").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_search.html"))
-	template_view   = template.Must(template.New("view").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_view.html"))
-	template_submit = template.Must(template.New("submit").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_submit.html"))
-	template_help   = template.Must(template.New("help").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_help.html"))
+	template_search *template.Template = nil
+	template_view   *template.Template = nil
+	template_submit *template.Template = nil
+	template_help   *template.Template = nil
 )
 
 type app struct {
 	db *pgx.Conn
 	r  *mux.Router
+}
+
+func initialiseApp() {
+	box := rice.MustFindBox("templates")
+
+	template_search = template.New("search").Funcs(templateFunctions)
+	template_search = template.Must(template_search.Parse(box.MustString("layout.html")))
+	template_search = template.Must(template_search.Parse(box.MustString("page_search.html")))
+
+	template_view = template.New("view").Funcs(templateFunctions)
+	template_view = template.Must(template_view.Parse(box.MustString("layout.html")))
+	template_view = template.Must(template_view.Parse(box.MustString("page_view.html")))
+
+	template_submit = template.New("submit").Funcs(templateFunctions)
+	template_submit = template.Must(template_submit.Parse(box.MustString("layout.html")))
+	template_submit = template.Must(template_submit.Parse(box.MustString("page_submit.html")))
+
+	template_help = template.New("help").Funcs(templateFunctions)
+	template_help = template.Must(template_help.Parse(box.MustString("layout.html")))
+	template_help = template.Must(template_help.Parse(box.MustString("page_help.html")))
 }
 
 func newApp(db *pgx.Conn) (app, error) {

@@ -1,8 +1,10 @@
+//go:generate rice embed-go
 package main
 
 import (
 	"net/http"
 
+	"github.com/GeertJohan/go.rice"
 	"github.com/alecthomas/kingpin"
 	"github.com/codegangsta/negroni"
 	"github.com/jackc/pgx"
@@ -16,6 +18,8 @@ var (
 
 func main() {
 	kingpin.Parse()
+
+	initialiseApp()
 
 	dbConfig, err := pgx.ParseURI(*databaseUrl)
 	if err != nil {
@@ -35,6 +39,7 @@ func main() {
 	s := negroni.New()
 	s.Use(negroni.NewRecovery())
 	s.Use(negronilogrus.NewMiddleware())
+	s.Use(negroni.NewStatic(rice.MustFindBox("public").HTTPBox()))
 	s.UseHandler(a)
 
 	if err := http.ListenAndServe(*addr, s); err != nil {
