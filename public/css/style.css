@@ -73,28 +73,6 @@ header {
   padding: 0.4em 0.6em;
 }
 
-.search > .stats {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin: 10px 0px;
-}
-
-.search > .hints {
-  font-size: 0.8em;
-}
-
-.search > .hints > ul {
-  margin: 0px;
-  padding: 0px;
-  list-style: none;
-}
-
-.search > .hints > ul > li {
-  display: inline-block;
-  padding: 0px;
-  margin: 0px;
-}
-
 footer {
   color: #c0c0c0;
   margin: 10px;
