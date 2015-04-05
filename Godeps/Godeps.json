@@ -1,0 +1,58 @@
+{
+	"ImportPath": "fknsrs.biz/p/jishaku-web",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "bitbucket.org/pkg/inflect",
+			"Comment": "go.r60-12",
+			"Rev": "8961c3750a47b8c0b3e118d52513b97adf85a7e8"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.6.6-2-g2cea0f0",
+			"Rev": "2cea0f0d141f56fae06df5b813ec4119d1c8ccbd"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/kingpin",
+			"Comment": "v1.3.5-2-g4bda5f2",
+			"Rev": "4bda5f22b451dc27fa1c2c6ea001bcfe18bf77ca"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/units",
+			"Rev": "6b4e7dc5e3143b85ea77909c72caf89416fc2915"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/negroni",
+			"Comment": "v0.1-62-g8d75e11",
+			"Rev": "8d75e11374a1928608c906fe745b538483e7aeb2"
+		},
+		{
+			"ImportPath": "github.com/dustin/go-humanize",
+			"Rev": "8cc1aaa2d955ee82833337cfb10babc42be6bce6"
+		},
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "215affda49addc4c8ef7e2534915df2c8c35c6cd"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Rev": "8096f47503459bcc74d1f4c487b7e6e42e5746b5"
+		},
+		{
+			"ImportPath": "github.com/jackc/pgx",
+			"Comment": "v2.4.0-43-g472929b",
+			"Rev": "472929b247d86df69c161de1847fcc48a8d69cdc"
+		},
+		{
+			"ImportPath": "github.com/meatballhat/negroni-logrus",
+			"Rev": "d5e114d7a445f7a3652cf807d3f83d5dceb8de26"
+		},
+		{
+			"ImportPath": "github.com/zeebo/bencode",
+			"Rev": "fb5f6a160b69eb7a87a83f4e403c03f2ed89b3d3"
+		}
+	]
+}
