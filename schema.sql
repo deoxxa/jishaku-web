@@ -1,5 +1,3 @@
-create extension if not exists "pg_trgm";
-
 create type torrent_file as (
   "path" text,
   "length" bigint
