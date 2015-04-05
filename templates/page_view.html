@@ -7,7 +7,7 @@
 
   <h3>Stats</h3>
   <ul class="stats">
-    <li>Submitted <time datetime="{{ .Entry.FirstSeen | iso }}" title="{{ .Entry.FirstSeen | iso }}">{{ .Entry.FirstSeen | ago }}</time></li>
+    <li>Submitted <time datetime="{{ .Entry.FirstSeen | rfc3339 }}" title="{{ .Entry.FirstSeen | rfc3339 }}">{{ .Entry.FirstSeen | rfc1123 }}</time></li>
     <li>{{ .Entry.Size | size }} in {{ len .Entry.Files }} {{ "file" | plural (len .Entry.Files) }}</li>
   </ul>
 

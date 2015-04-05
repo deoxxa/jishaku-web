@@ -10,9 +10,9 @@ import (
 )
 
 var templateFunctions = template.FuncMap{
-	"ago":  humanize.Time,
-	"size": func(v int64) string { return humanize.Bytes(uint64(v)) },
-	"iso":  func(t time.Time) string { return t.Format(time.RFC3339) },
+	"size":    func(v int64) string { return humanize.Bytes(uint64(v)) },
+	"rfc3339": func(t time.Time) string { return t.Format(time.RFC3339) },
+	"rfc1123": func(t time.Time) string { return t.Format(time.RFC1123) },
 	"host": func(s string) string {
 		if u, err := url.Parse(s); err != nil {
 			return ""
