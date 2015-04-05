@@ -2,13 +2,13 @@
 
 {{ define "content" }}
 <div class="torrent-details">
-  <h1>{{ .Torrent.Name }}</h1>
-  <h4>Hash: {{ .Torrent.Hash }}</h4>
+  <h1>{{ .Entry.Name }}</h1>
+  <h4>Hash: {{ .Entry.InfoHash }}</h4>
 
   <h3>Stats</h3>
   <ul class="stats">
-    <li>Submitted <time datetime="{{ .Torrent.FirstSeen | iso }}" title="{{ .Torrent.FirstSeen | iso }}">{{ .Torrent.FirstSeen | ago }}</time></li>
-    <li>{{ .Torrent.Size | size }} in {{ len .Torrent.Files }} {{ "file" | plural (len .Torrent.Files) }}</li>
+    <li>Submitted <time datetime="{{ .Entry.FirstSeen | iso }}" title="{{ .Entry.FirstSeen | iso }}">{{ .Entry.FirstSeen | ago }}</time></li>
+    <li>{{ .Entry.Size | size }} in {{ len .Entry.Files }} {{ "file" | plural (len .Entry.Files) }}</li>
   </ul>
 
   <h3>Files</h3>
@@ -20,7 +20,7 @@
       </tr>
     </thead>
     <tbody>
-{{ range .Torrent.Files }}
+{{ range .Entry.Files }}
       <tr>
         <td>{{ .Path }}</td>
         <td>{{ .Length | size }}</td>
@@ -31,15 +31,15 @@
 
   <h3>Links</h3>
   <ol class="links">
-    <li><a href="{{ .Torrent.MagnetURI }}" rel="nofollow">Magnet Link</a></li>
-{{ range .Torrent.Locations }}
+    <li><a href="{{ .Entry.MagnetURI }}" rel="nofollow">Magnet Link</a></li>
+{{ range .Entry.Locations }}
     <li><a href="{{ . }}" rel="nofollow">{{ . | host }}</a></li>
 {{ end }}
   </ol>
 
   <h3>Trackers</h3>
   <ul class="trackers">
-{{ range .Torrent.Trackers }}
+{{ range .Entry.Trackers }}
     <li>{{ . }}</li>
 {{ end }}
   </ul>

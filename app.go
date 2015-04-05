@@ -1,140 +1,222 @@
-package web
+package main
 
 import (
+	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"html/template"
-	"log"
 	"net/http"
-	"net/url"
-	"path"
+	"strings"
 	"time"
 
-	"bitbucket.org/kardianos/osext"
-	"bitbucket.org/pkg/inflect"
-	"code.google.com/p/go-uuid/uuid"
-	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx"
+	"github.com/zeebo/bencode"
 )
 
-var templateFunctions = template.FuncMap{
-	"ago":  humanize.Time,
-	"size": humanize.Bytes,
-	"iso":  func(t time.Time) string { return t.Format(time.RFC3339) },
-	"host": func(s string) string {
-		if u, err := url.Parse(s); err != nil {
-			return ""
-		} else {
-			return u.Host
-		}
-	},
-	"plural": func(n int, s string) string {
-		if n == 1 {
-			return s
-		} else {
-			return inflect.Pluralize(s)
-		}
-	},
-}
+const (
+	QUERY_LIST   = `select "info_hash", "name", "size", "first_seen" from "torrents" order by "first_seen" desc limit 50`
+	QUERY_SEARCH = `select "info_hash", "name", "size", "first_seen" from "torrents" where "name" ilike any($1) order by "first_seen" desc limit 50`
+	QUERY_VIEW   = `select "info_hash", "name", "size", "first_seen", "files", "trackers", "locations" from "torrents" where "info_hash" = $1`
+	QUERY_INSERT = `insert into "torrents" ("info_hash", "name", "size", "first_seen", "files", "trackers", "locations") values ($1, $2, $3, $4, $5, $6, $7)`
+)
 
-var root, _ = osext.ExecutableFolder()
-
-type pageData struct {
-	Title string
-}
-
-type AppConfig struct {
-	Store StoreFactory
-}
+var (
+	template_search = template.Must(template.New("search").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_search.html"))
+	template_view   = template.Must(template.New("view").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_view.html"))
+	template_submit = template.Must(template.New("submit").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_submit.html"))
+	template_help   = template.Must(template.New("help").Funcs(templateFunctions).ParseFiles("templates/layout.html", "templates/page_help.html"))
+)
 
 type app struct {
-	config AppConfig
-	store  Store
-	router *mux.Router
+	db *pgx.Conn
+	r  *mux.Router
 }
 
-type appRoute struct {
-	*app
-	fn func(w http.ResponseWriter, r *http.Request)
-}
+func newApp(db *pgx.Conn) (app, error) {
+	r := mux.NewRouter()
 
-func (a *appRoute) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	a.fn(w, r)
-}
+	a := app{db, r}
 
-func NewApp(c AppConfig) (*app, error) {
-	store, err := c.Store.build()
-	if err != nil {
-		return nil, err
-	}
-
-	a := &app{
-		config: c,
-		store:  store,
-		router: mux.NewRouter(),
-	}
-
-	a.router.NotFoundHandler = http.FileServer(http.Dir(path.Join(root, "public")))
-
-	a.router.NewRoute().Name("search_get").Methods("GET").Path("/").Handler(&appRoute{
-		app: a,
-		fn:  a.getSearch,
-	})
-
-	a.router.NewRoute().Name("torrent_get").Methods("GET").Path("/torrent/{id:[0-9a-f]{40}}").Handler(&appRoute{
-		app: a,
-		fn:  a.getTorrent,
-	})
-
-	a.router.NewRoute().Name("submit_get").Methods("GET").Path("/submit").Handler(&appRoute{
-		app: a,
-		fn:  a.getSubmit,
-	})
-
-	a.router.NewRoute().Name("torrent_post").Methods("POST").Path("/torrent").Handler(&appRoute{
-		app: a,
-		fn:  a.postTorrent,
-	})
-
-	a.router.NewRoute().Name("torrent_post_file").Methods("POST").Path("/torrent").Headers("content-type", "application/x-bittorrent").Handler(&appRoute{
-		app: a,
-		fn:  a.postTorrentFile,
-	})
-
-	a.router.NewRoute().Name("help_get").Methods("GET").Path("/help").Handler(&appRoute{
-		app: a,
-		fn:  a.getHelp,
-	})
+	r.NewRoute().Methods("GET").Path("/").HandlerFunc(a.Search)
+	r.NewRoute().Methods("GET").Path("/torrent/{id:[0-9a-f]{40}}").HandlerFunc(a.View)
+	r.NewRoute().Methods("GET").Path("/submit").HandlerFunc(a.ShowSubmit)
+	r.NewRoute().Methods("POST").Path("/torrent").HandlerFunc(a.Submit)
+	r.NewRoute().Methods("GET").Path("/help").HandlerFunc(a.ShowHelp)
 
 	return a, nil
 }
 
-type wrappedWriter struct {
-	http.ResponseWriter
-	status int
+func (a app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.r.ServeHTTP(w, r)
 }
 
-func newWrappedWriter(w http.ResponseWriter) *wrappedWriter {
-	return &wrappedWriter{
-		ResponseWriter: w,
-		status:         200,
+func (a app) Search(w http.ResponseWriter, r *http.Request) {
+	var rows *pgx.Rows
+
+	if q := r.URL.Query().Get("q"); q == "" {
+		if r, err := a.db.Query(QUERY_LIST); err != nil {
+			panic(err)
+		} else {
+			rows = r
+		}
+	} else {
+		words := strings.Split(q, " ")
+		for i, w := range words {
+			words[i] = "%" + w + "%"
+		}
+
+		if r, err := a.db.Query(QUERY_SEARCH, words); err != nil {
+			panic(err)
+		} else {
+			rows = r
+		}
+	}
+
+	l := make([]Entry, 0, 100)
+	for rows.Next() {
+		var e Entry
+		if err := rows.Scan(&e.InfoHash, &e.Name, &e.Size, &e.FirstSeen); err != nil {
+			panic(err)
+		}
+
+		l = append(l, e)
+	}
+
+	d := searchTemplateData{
+		templateData: templateData{
+			Title:        "Search",
+			CurrentQuery: r.URL.Query().Get("q"),
+		},
+		Entries: l,
+	}
+
+	if err := template_search.ExecuteTemplate(w, "layout", d); err != nil {
+		panic(err)
 	}
 }
 
-func (w *wrappedWriter) WriteHeader(status int) {
-	w.status = status
+func (a app) View(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
 
-	w.ResponseWriter.WriteHeader(status)
+	var e Entry
+	if err := a.db.QueryRow(QUERY_VIEW, vars["id"]).Scan(&e.InfoHash, &e.Name, &e.Size, &e.FirstSeen, &e.Files, &e.Trackers, &e.Locations); err != nil {
+		if err == pgx.ErrNoRows {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		panic(err)
+	}
+
+	d := viewTemplateData{
+		templateData: templateData{
+			Title:        e.Name,
+			CurrentQuery: r.URL.Query().Get("q"),
+		},
+		Entry: e,
+	}
+
+	if err := template_view.ExecuteTemplate(w, "layout", d); err != nil {
+		panic(err)
+	}
 }
 
-func (h *app) ServeHTTP(_w http.ResponseWriter, r *http.Request) {
-	w := newWrappedWriter(_w)
+func (a app) ShowSubmit(w http.ResponseWriter, r *http.Request) {
+	d := templateData{
+		Title:        "Submit Entry",
+		CurrentQuery: r.URL.Query().Get("q"),
+	}
 
-	id := uuid.New()
-	t := time.Now()
+	if err := template_submit.ExecuteTemplate(w, "layout", d); err != nil {
+		panic(err)
+	}
+}
 
-	log.Printf("request time=%#v id=%s method=%s path=%#v", time.Now().Format(time.RFC3339), id, r.Method, r.URL.String())
-	defer func() {
-		log.Printf("response time=%#v id=%s status=%d duration=%s", time.Now().Format(time.RFC3339), id, w.status, time.Since(t))
-	}()
+func (a app) Submit(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(1024 * 128); err != nil {
+		panic(err)
+	}
 
-	h.router.ServeHTTP(w, r)
+	u := r.Form.Get("url")
+
+	res, err := http.Get(u)
+	if err != nil {
+		panic(err)
+	}
+
+	var t Torrent
+	if err := bencode.NewDecoder(res.Body).Decode(&t); err != nil {
+		panic(err)
+	}
+	if err := bencode.NewDecoder(bytes.NewReader(t.RawInfo)).Decode(&t.Info); err != nil {
+		panic(err)
+	}
+
+	h := sha1.New()
+	if _, err := h.Write(t.RawInfo); err != nil {
+		panic(err)
+	}
+	d := h.Sum(nil)
+
+	e := Entry{
+		InfoHash:  hex.EncodeToString(d),
+		Name:      t.Info.Name,
+		Locations: []string{u},
+		FirstSeen: time.Now(),
+	}
+
+	if len(t.Info.Files) == 0 {
+		e.Files = []TorrentFile{
+			{
+				Path:   t.Info.Name,
+				Length: t.Info.Length,
+			},
+		}
+
+		e.Size = t.Info.Length
+	} else {
+		for _, f := range t.Info.Files {
+			e.Files = append(e.Files, TorrentFile{
+				Path:   f.Path,
+				Length: f.Length,
+			})
+
+			e.Size += f.Length
+		}
+	}
+
+	if t.Announce != "" {
+		e.Trackers = append(e.Trackers, t.Announce)
+	}
+
+	for _, p := range t.AnnounceList {
+		for _, p := range p {
+			e.Trackers = append(e.Trackers, p)
+		}
+	}
+
+	if _, err := a.db.Exec(QUERY_INSERT, e.InfoHash, e.Name, e.Size, e.FirstSeen, e.Files.String(), e.Trackers, e.Locations); err != nil {
+		if strings.Contains(err.Error(), `duplicate key value violates unique constraint "torrents_pkey"`) {
+			w.Header().Set("location", "/torrent/"+e.InfoHash)
+			w.WriteHeader(http.StatusFound)
+			return
+		}
+
+		panic(err)
+	}
+
+	w.Header().Set("location", "/torrent/"+e.InfoHash)
+	w.WriteHeader(http.StatusSeeOther)
+}
+
+func (a app) ShowHelp(w http.ResponseWriter, r *http.Request) {
+	d := templateData{
+		Title:        "Help",
+		CurrentQuery: r.URL.Query().Get("q"),
+	}
+
+	if err := template_help.ExecuteTemplate(w, "layout", d); err != nil {
+		panic(err)
+	}
 }

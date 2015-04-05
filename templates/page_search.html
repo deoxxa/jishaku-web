@@ -5,42 +5,12 @@
       <input type="text" name="q" placeholder="Search..." value="{{ .CurrentQuery }}" autofocus>
     </form>
 
-    <div class="stats">
-{{ if .Pages.Count }}
-      Showing {{ .Page.StartIndex }} to {{ .Page.EndIndex }} of {{ .Pages.Count }} total {{ "result" | plural .Pages.Count }}.
-{{ else }}
-      No results to display!
-{{ end }}
-    </div>
-
     <div class="hints">
       <ul>
         <li>Help:</li>
         <li><a href="/help#advanced-search-syntax">advanced search syntax</a></li>
       </ul>
     </div>
-
-{{ if .Pages.Count }}
-    <ul class="pagination">
-      <li>Page:</li>
-
-{{ if .Page.HasPrev }}
-      <li><a href="/?page={{ .Page.PrevPage }}">Previous</a></li>
-{{ end }}
-
-{{ range .Pages.PageRange }}
-{{ if eq . $.Page.PageNumber }}
-    <li>{{ . }}</li>
-{{ else }}
-    <li><a href="/?page={{ . }}">{{ . }}</a></li>
-{{ end }}
-{{ end }}
-
-{{ if .Page.HasNext }}
-      <li><a href="/?page={{ .Page.NextPage }}">Next</a></li>
-{{ end }}
-    </ul>
-{{ end }}
   </div>
 </header>
 {{ end }}
@@ -49,8 +19,8 @@
 <div class="index">
   <table class="torrent-list">
     <tbody>
-{{ range .Torrents }}
-      <tr id="torrent-list-entry-{{ .Hash }}">
+{{ range .Entries }}
+      <tr id="torrent-list-entry-{{ .InfoHash }}">
         <td>
           <a class="torrent-title" href="{{ .MagnetURI }}">{{ .Name }}</a>
           <ul class="torrent-details">
@@ -60,7 +30,7 @@
         </td>
         <td>
           <ul class="torrent-links">
-            <li><a href="/torrent/{{ .Hash }}">Details</a></li>
+            <li><a href="/torrent/{{ .InfoHash }}">Details</a></li>
           </ul>
         </td>
       </tr>
