@@ -29,22 +29,24 @@ func New(path string) negroni.Handler {
 }
 
 func (h *hackyStats) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	nw := w.(negroni.ResponseWriter)
+
 	if r.URL.Path == h.p {
 		h.m.RLock()
 		for i := len(h.c) - 1; i > 0; i-- {
 			v := h.c[i]
 
 			var d time.Duration
-			var c string
+			var c int
 			if v.e == (time.Time{}) {
 				d = time.Now().Sub(v.b)
-				c = "pending"
+				c = -1
 			} else {
 				d = v.e.Sub(v.b)
-				c = "complete"
+				c = nw.Status()
 			}
 
-			fmt.Fprintf(w, "%s %-8s %-12s %-6s %s\n", v.b.Format(time.RFC3339), c, d.String(), v.m, v.u)
+			fmt.Fprintf(w, "%s %3d %8d %-12s %-6s %s\n", v.b.Format(time.RFC3339), c, nw.Size(), d.String(), v.m, v.u)
 		}
 		h.m.RUnlock()
 
