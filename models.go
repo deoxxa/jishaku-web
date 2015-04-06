@@ -117,14 +117,10 @@ func (t *TorrentFileList) Scan(r *pgx.ValueReader) error {
 
 	_ = r.ReadOid() // element type; unused
 
-	dims, lbound := make([]int32, ndim), make([]int32, ndim)
+	dims := make([]int32, ndim)
 	for i := 0; i < int(ndim); i++ {
 		dims[i] = r.ReadInt32()
-		lbound[i] = r.ReadInt32()
-	}
-
-	if dims[0] != lbound[0] {
-		return pgx.SerializationError(fmt.Sprintf("TorrentFileList.Scan expected the count and lower bound to be equal"))
+		_ = r.ReadInt32()
 	}
 
 	for i := 0; i < int(dims[0]); i++ {
