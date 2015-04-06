@@ -14,6 +14,8 @@ type stats struct {
 	e time.Time
 	m string
 	u string
+	s int
+	l int
 }
 
 type hackyStats struct {
@@ -37,23 +39,20 @@ func (h *hackyStats) ServeHTTP(w http.ResponseWriter, r *http.Request, next http
 			v := h.c[i]
 
 			var d time.Duration
-			var c int
 			if v.e == (time.Time{}) {
 				d = time.Now().Sub(v.b)
-				c = -1
 			} else {
 				d = v.e.Sub(v.b)
-				c = nw.Status()
 			}
 
-			fmt.Fprintf(w, "%s %3d %8d %-12s %-6s %s\n", v.b.Format(time.RFC3339), c, nw.Size(), d.String(), v.m, v.u)
+			fmt.Fprintf(w, "%s %3d %8d %-12s %-6s %s\n", v.b.Format(time.RFC3339), v.s, v.l, d.String(), v.m, v.u)
 		}
 		h.m.RUnlock()
 
 		return
 	}
 
-	e := &stats{time.Now(), time.Time{}, r.Method, r.URL.String()}
+	e := &stats{time.Now(), time.Time{}, r.Method, r.URL.String(), 0, 0}
 
 	h.m.Lock()
 	h.c = append(h.c, e)
@@ -61,6 +60,8 @@ func (h *hackyStats) ServeHTTP(w http.ResponseWriter, r *http.Request, next http
 
 	defer func() {
 		e.e = time.Now()
+		e.s = nw.Status()
+		e.l = nw.Size()
 
 		go func() {
 			time.Sleep(time.Second * 60)
