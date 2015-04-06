@@ -61,6 +61,7 @@ func newApp(db *pgx.ConnPool) (app, error) {
 	a := app{db, r}
 
 	r.NewRoute().Methods("GET").Path("/").HandlerFunc(a.Search)
+	r.NewRoute().Methods("GET").Path("/view.php").HandlerFunc(a.Redirect)
 	r.NewRoute().Methods("GET").Path("/torrent/{id:[0-9a-f]{40}}").HandlerFunc(a.View)
 	r.NewRoute().Methods("GET").Path("/submit").HandlerFunc(a.ShowSubmit)
 	r.NewRoute().Methods("POST").Path("/torrent").HandlerFunc(a.Submit)
@@ -128,6 +129,22 @@ func (a app) Search(w http.ResponseWriter, r *http.Request) {
 	if err := template_search.ExecuteTemplate(w, "layout", d); err != nil {
 		panic(err)
 	}
+}
+
+func (a app) Redirect(w http.ResponseWriter, r *http.Request) {
+	if id := r.URL.Query().Get("id"); id != "" {
+		var infoHash string
+
+		if err := a.db.QueryRow(QUERY_REDIRECT, id).Scan(&infoHash); err != pgx.ErrNoRows && err != nil {
+			panic(err)
+		} else if err == nil {
+			w.Header().Set("location", "/torrent/"+infoHash)
+			w.WriteHeader(http.StatusMovedPermanently)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusGone)
 }
 
 func (a app) View(w http.ResponseWriter, r *http.Request) {
