@@ -14,4 +14,9 @@ create table torrents (
   "locations" text[] not null
 );
 
-create index name_idx on torrents USING gin (name gin_trgm_ops);
+create index name_idx on torrents using gin (name gin_trgm_ops);
+
+create table old_ids (
+  "old_id" bigint not null primary key,
+  "info_hash" char(40) not null
+);
