@@ -10,7 +10,7 @@ import (
 	"github.com/meatballhat/negroni-logrus"
 )
 
-func serverCommandFunction(databaseSocket, databaseName, addr string) {
+func webCommandFunction(databaseSocket, databaseName, addr string) {
 	initialiseTemplates()
 
 	dbConfig := pgx.ConnPoolConfig{
