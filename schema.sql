@@ -8,7 +8,7 @@ create table torrents (
   "name" text not null,
   "comment" text,
   "size" bigint not null,
-  "first_seen" timestamp with time zone not null,
+  "first_seen" timestamp not null,
   "files" torrent_file[] not null,
   "trackers" text[] not null,
   "locations" text[] not null

@@ -16,10 +16,11 @@ import (
 )
 
 const (
-	QUERY_LIST   = `select "info_hash", "name", "size", "first_seen" from "torrents" order by "first_seen" desc limit 50`
-	QUERY_SEARCH = `select "info_hash", "name", "size", "first_seen" from "torrents" where "name" ilike any($1) order by "first_seen" desc limit 50`
-	QUERY_VIEW   = `select "info_hash", "name", "size", "first_seen", "files", "trackers", "locations" from "torrents" where "info_hash" = $1`
-	QUERY_INSERT = `insert into "torrents" ("info_hash", "name", "size", "first_seen", "files", "trackers", "locations") values ($1, $2, $3, $4, $5, $6, $7)`
+	QUERY_REDIRECT = `select "info_hash" from "old_ids" where "old_id" = $1`
+	QUERY_LIST     = `select "info_hash", "name", "size", "first_seen" from "torrents" order by "first_seen" desc limit 50`
+	QUERY_SEARCH   = `select "info_hash", "name", "size", "first_seen" from "torrents" where "name" ilike any($1) order by "first_seen" desc limit 50`
+	QUERY_VIEW     = `select "info_hash", "name", "size", "first_seen", "files", "trackers", "locations" from "torrents" where "info_hash" = $1`
+	QUERY_INSERT   = `insert into "torrents" ("info_hash", "name", "size", "first_seen", "files", "trackers", "locations") values ($1, $2, $3, $4, $5, $6, $7)`
 )
 
 var (
@@ -73,6 +74,18 @@ func (a app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a app) Search(w http.ResponseWriter, r *http.Request) {
+	if id := r.URL.Query().Get("torrent_id"); id != "" {
+		var infoHash string
+
+		if err := a.db.QueryRow(QUERY_REDIRECT, id).Scan(&infoHash); err != pgx.ErrNoRows && err != nil {
+			panic(err)
+		} else if err == nil {
+			w.Header().Set("location", "/torrent/"+infoHash)
+			w.WriteHeader(http.StatusMovedPermanently)
+			return
+		}
+	}
+
 	var rows *pgx.Rows
 
 	if q := r.URL.Query().Get("q"); q == "" {
