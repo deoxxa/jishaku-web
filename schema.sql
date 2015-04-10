@@ -11,7 +11,8 @@ create table torrents (
   "first_seen" timestamp not null,
   "files" torrent_file[] not null,
   "trackers" text[] not null,
-  "locations" text[] not null
+  "locations" text[] not null,
+  "last_scrape" timestamp
 );
 
 create index name_idx on torrents using gin (name gin_trgm_ops);
@@ -19,4 +20,14 @@ create index name_idx on torrents using gin (name gin_trgm_ops);
 create table old_ids (
   "old_id" bigint not null primary key,
   "info_hash" char(40) not null
+);
+
+create table scrapes (
+  "info_hash" char(40) not null references "torrents" ("info_hash"),
+  "tracker" text not null,
+  "time" timestamp not null,
+  "success" boolean not null,
+  "downloaded" bigint,
+  "complete" bigint,
+  "incomplete" bigint
 );
