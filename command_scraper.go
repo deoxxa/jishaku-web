@@ -15,13 +15,19 @@ var (
 	UPDATE_QUERY = `update "torrents" set "last_scrape" = now() where "info_hash" = $1`
 )
 
-func scraperCommandFunction(databaseSocket, databaseName string) {
+func scraperCommandFunction(databaseDSN string, debug bool) {
+	connConfig, err := pgx.ParseDSN(databaseDSN)
+	if err != nil {
+		panic(err)
+	}
+
 	dbConfig := pgx.ConnPoolConfig{
-		ConnConfig: pgx.ConnConfig{
-			Host:     databaseSocket,
-			Database: databaseName,
-		},
+		ConnConfig:     connConfig,
 		MaxConnections: 4,
+	}
+
+	if debug {
+		dbConfig.Logger = (*wrappedLogger)(logrus.StandardLogger())
 	}
 
 	db, err := pgx.NewConnPool(dbConfig)

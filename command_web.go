@@ -5,20 +5,27 @@ import (
 
 	"fknsrs.biz/p/negroni-hackystats"
 	"github.com/GeertJohan/go.rice"
+	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/negroni"
 	"github.com/jackc/pgx"
 	"github.com/meatballhat/negroni-logrus"
 )
 
-func webCommandFunction(databaseSocket, databaseName, addr string) {
+func webCommandFunction(databaseDSN string, debug bool, addr string) {
 	initialiseTemplates()
 
+	connConfig, err := pgx.ParseDSN(databaseDSN)
+	if err != nil {
+		panic(err)
+	}
+
 	dbConfig := pgx.ConnPoolConfig{
-		ConnConfig: pgx.ConnConfig{
-			Host:     databaseSocket,
-			Database: databaseName,
-		},
+		ConnConfig:     connConfig,
 		MaxConnections: 4,
+	}
+
+	if debug {
+		dbConfig.Logger = (*wrappedLogger)(logrus.StandardLogger())
 	}
 
 	db, err := pgx.NewConnPool(dbConfig)

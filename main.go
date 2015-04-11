@@ -9,19 +9,19 @@ import (
 
 var (
 	kp             = kingpin.New("jishaku", "Jishaku Toshokan")
-	databaseSocket = kp.Flag("database_socket", "Connect to postgres using this socket.").Short('s').String()
-	databaseName   = kp.Flag("database_name", "Use this database.").Short('d').Default("jishaku").String()
+	databaseDSN    = kp.Flag("database_dsn", "Connect to postgres using this information.").Default("dbname=jishaku").String()
+	debug          = kp.Flag("debug", "Enable debug logging.").Bool()
 	webCommand     = kp.Command("web", "Run the web server.")
-	addr           = webCommand.Flag("addr", "Listen on this address.").Short('a').Default(":3000").String()
+	addr           = webCommand.Flag("addr", "Listen on this address.").Default(":3000").String()
 	scraperCommand = kp.Command("scraper", "Run the scraper daemon.")
 )
 
 func main() {
 	switch kingpin.MustParse(kp.Parse(os.Args[1:])) {
 	case webCommand.FullCommand():
-		webCommandFunction(*databaseSocket, *databaseName, *addr)
+		webCommandFunction(*databaseDSN, *debug, *addr)
 	case scraperCommand.FullCommand():
-		scraperCommandFunction(*databaseSocket, *databaseName)
+		scraperCommandFunction(*databaseDSN, *debug)
 	default:
 		kp.Usage(os.Stderr)
 		os.Exit(1)
