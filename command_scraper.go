@@ -55,17 +55,17 @@ func scraperCommandFunction(databaseDSN string, debug bool) {
 				// continue
 			}
 
-			h, err := scraper.HashFromString(infoHash)
-			if err != nil {
-				panic(err)
-			}
-
 			wg1.Add(1)
 
-			go func() {
+			go func(infoHash string, trackers []string) {
 				defer wg1.Done()
 
 				var wg2 sync.WaitGroup
+
+				h, err := scraper.HashFromString(infoHash)
+				if err != nil {
+					panic(err)
+				}
 
 				for _, t := range trackers {
 					wg2.Add(1)
@@ -102,7 +102,7 @@ func scraperCommandFunction(databaseDSN string, debug bool) {
 				if _, err := db.Exec(UPDATE_QUERY, infoHash); err != nil {
 					panic(err)
 				}
-			}()
+			}(infoHash, trackers)
 		}
 
 		logrus.Info("waiting")
