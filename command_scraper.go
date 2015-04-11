@@ -2,6 +2,7 @@ package main
 
 import (
 	"sync"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/jackc/pgx"
@@ -47,7 +48,10 @@ func scraperCommandFunction(databaseDSN string, debug bool) {
 
 		var wg1 sync.WaitGroup
 
+		var c int
 		for rows.Next() {
+			c++
+
 			var infoHash string
 			var trackers []string
 			if err := rows.Scan(&infoHash, &trackers); err != nil {
@@ -105,8 +109,12 @@ func scraperCommandFunction(databaseDSN string, debug bool) {
 			}(infoHash, trackers)
 		}
 
-		logrus.Info("waiting")
+		logrus.WithField("count", c).Info("waiting")
 
 		wg1.Wait()
+
+		if c == 0 {
+			time.Sleep(time.Minute)
+		}
 	}
 }
