@@ -55,8 +55,8 @@
 		},
 		{
 			"ImportPath": "github.com/jackc/pgx",
-			"Comment": "v2.4.0-43-g472929b",
-			"Rev": "472929b247d86df69c161de1847fcc48a8d69cdc"
+			"Comment": "v2.4.0-52-g879ca97",
+			"Rev": "879ca97228dc4ad2f2901dd2a16ed2bb61dfe6cb"
 		},
 		{
 			"ImportPath": "github.com/kardianos/osext",
