@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/cheggaaa/pb"
 	"github.com/jackc/pgx"
 
 	"fknsrs.biz/p/jishaku-web/lib/scraper"
@@ -48,6 +49,8 @@ func scraperCommandFunction(databaseDSN string, debug bool) {
 
 		var wg1 sync.WaitGroup
 
+		bar := pb.New(0)
+
 		var c int
 		for rows.Next() {
 			c++
@@ -72,10 +75,12 @@ func scraperCommandFunction(databaseDSN string, debug bool) {
 				}
 
 				for _, t := range trackers {
+					bar.Total += 1
 					wg2.Add(1)
 
 					go func(t string) {
 						defer wg2.Done()
+						defer bar.Increment()
 
 						l := logrus.WithFields(logrus.Fields{
 							"info_hash": infoHash,
@@ -111,7 +116,11 @@ func scraperCommandFunction(databaseDSN string, debug bool) {
 
 		logrus.WithField("count", c).Info("waiting")
 
+		bar.Start()
+
 		wg1.Wait()
+
+		bar.Finish()
 
 		if c == 0 {
 			time.Sleep(time.Minute)

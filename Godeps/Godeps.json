@@ -33,6 +33,10 @@
 			"Rev": "6b4e7dc5e3143b85ea77909c72caf89416fc2915"
 		},
 		{
+			"ImportPath": "github.com/cheggaaa/pb",
+			"Rev": "467c52dcaefb4913d1feb16f6a771777c9613a64"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/negroni",
 			"Comment": "v0.1-62-g8d75e11",
 			"Rev": "8d75e11374a1928608c906fe745b538483e7aeb2"
