@@ -55,11 +55,16 @@ type Scraper struct {
 }
 
 func New() Scraper {
+	udpt := newUDPTransport()
+
+	go udpt.run()
+
 	return Scraper{
 		reqs: make(chan scrapeRequest),
 		impls: map[string]func(u *url.URL) (Backend, error){
-			"http":  newHTTPTracker,
-			"https": newHTTPTracker,
+			// "http":  newHTTPTracker,
+			// "https": newHTTPTracker,
+			"udp": udpt.newUDPTracker,
 		},
 		cache: make(map[string]Backend),
 		queue: make(map[Backend][]scrapeRequest),
