@@ -28,7 +28,7 @@ type httpTracker struct {
 	c *http.Client
 }
 
-func newHttpTracker(u *url.URL) (Backend, error) {
+func newHTTPTracker(u *url.URL) (Backend, error) {
 	t := httpTracker{
 		u: u,
 		c: &http.Client{

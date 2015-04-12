@@ -58,8 +58,8 @@ func New() Scraper {
 	return Scraper{
 		reqs: make(chan scrapeRequest),
 		impls: map[string]func(u *url.URL) (Backend, error){
-			"http":  newHttpTracker,
-			"https": newHttpTracker,
+			"http":  newHTTPTracker,
+			"https": newHTTPTracker,
 		},
 		cache: make(map[string]Backend),
 		queue: make(map[Backend][]scrapeRequest),
