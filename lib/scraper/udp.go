@@ -58,8 +58,8 @@ func (t *udpTransport) run() {
 
 		fmt.Printf("incoming: %#v\n", h)
 
-		if c, ok := t.tx[h.txid]; !ok {
-			fmt.Printf("unrecognised transaction id in response: %d\n", h.txid)
+		if c, ok := t.tx[h.TxID]; !ok {
+			fmt.Printf("unrecognised transaction id in response: %d\n", h.TxID)
 		} else {
 			c <- b
 		}
@@ -124,17 +124,19 @@ func newUDPTracker(x *udpTransport, u *url.URL) (Backend, error) {
 		cres connectionResponse
 	)
 
-	if err := x.req(raddr, &creq, &cres); err != nil {
+	if err := t.req(&creq, &cres); err != nil {
 		t.err = err
 		return t, nil
 	}
 
-	if cres.action != 0 {
-		t.err = fmt.Errorf("action is not set to connect (0), instead got %d", cres.action)
+	if cres.Action != 0 {
+		t.err = fmt.Errorf("action is not set to connect (0), instead got %d", cres.Action)
 		return t, nil
 	}
 
-	t.cid = cres.cid
+	t.cid = cres.CID
+
+	fmt.Printf("all done! cid is %d\n", t.cid)
 
 	return t, nil
 }
@@ -186,23 +188,23 @@ type connectionRequest struct {
 }
 
 func (c *connectionRequest) build() []byte {
-	b := make([]byte, 16)
+	b := bytes.NewBuffer(nil)
 
-	if err := binary.Write(bytes.NewBuffer(b), binary.BigEndian, c); err != nil {
+	if err := binary.Write(b, binary.BigEndian, c); err != nil {
 		panic(err)
 	}
 
-	return b
+	return b.Bytes()
 }
 
 type responseHeader struct {
-	action uint32
-	txid   uint32
+	Action uint32
+	TxID   uint32
 }
 
 type connectionResponse struct {
 	responseHeader
-	cid uint64
+	CID uint64
 }
 
 func (c *connectionResponse) parse(b []byte) error {
