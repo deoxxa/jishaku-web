@@ -31,3 +31,5 @@ create table scrapes (
   "complete" bigint,
   "incomplete" bigint
 );
+
+create index "info_hash_idx" on "scrapes" ("info_hash");
